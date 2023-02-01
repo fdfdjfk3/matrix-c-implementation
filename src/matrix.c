@@ -57,7 +57,7 @@ void Matrix_print(Matrix *mat) {
     for (size_t x = 0; x < mat->width; x++) {
       printf("%f", Matrix_get(mat, y, x));
       if (x != mat->width - 1) {
-        printf(", ");
+        printf(" | ");
       }
     }
     printf("|\n");
@@ -145,7 +145,7 @@ Matrix *Matrix_mul(Matrix *mat1, Matrix *mat2) {
   if (mat1->width != mat2->height)
     return NULL;
 
-  Matrix *result = Matrix_create_empty(mat1->height, mat2->width);
+  Matrix *result = Matrix_create_empty(mat2->width, mat1->height);
 
   // make sure that allocation was successful
   if (!result)

@@ -120,6 +120,7 @@ Matrix *Matrix_scalar_mul(Matrix *mat, double scalar);
 
 /** Multiplies two matrices together and creates a new Matrix with the result.
  * Matrix 1's width must equal Matrix 2's height.
+ *
  * @param mat1 Matrix 1
  * @param mat2 Matrix 2
  * @return Pointer to new allocated Matrix, or NULL if something went wrong.
