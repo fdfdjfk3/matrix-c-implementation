@@ -58,12 +58,20 @@ double Matrix_get(Matrix *mat, size_t y, size_t x) {
   return 0.0;
 }
 
-void Matrix_set(Matrix *mat, size_t y, size_t x, double val) {
-  if (y < mat->height && x < mat->width)
-    mat->_elems[y * mat->width + x] = val;
+int Matrix_set(Matrix *mat, size_t y, size_t x, double val) {
+  if (y >= mat->height && x >= mat->width) {
+    return 1;
+  }
+  mat->_elems[y * mat->width + x] = val;
+  return 0;
 }
 
 void Matrix_print(Matrix *mat) {
+  if (!mat) {
+    printf("NULL\n");
+    return;
+  }
+
   for (size_t y = 0; y < mat->height; y++) {
     printf("|");
     for (size_t x = 0; x < mat->width; x++) {

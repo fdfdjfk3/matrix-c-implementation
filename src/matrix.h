@@ -78,11 +78,13 @@ double Matrix_get(Matrix *mat, size_t y, size_t x);
  * @param y Y position in matrix
  * @param x X position in matrix
  * @param val Value to be set
+ * @return 0 if operation was successful and 1 if operation was not successful
  */
-void Matrix_set(Matrix *mat, size_t y, size_t x, double val);
+int Matrix_set(Matrix *mat, size_t y, size_t x, double val);
 
 /**
- * Prints the contents of a matrix neatly.
+ * Prints the contents of a matrix neatly. If the given Matrix pointer is NULL,
+ * this function will simply print "NULL"
  *
  * @param mat A reference to the Matrix to be printed.
  */
