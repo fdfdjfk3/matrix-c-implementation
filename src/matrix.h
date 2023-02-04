@@ -46,6 +46,14 @@ Matrix *Matrix_create_filled(size_t width, size_t height,
                              double elems[width * height]);
 
 /**
+ * Clones a matrix
+ *
+ * @param mat The matrix to be cloned
+ * @return A reference to the allocated Matrix
+ */
+Matrix *Matrix_clone(Matrix *mat);
+
+/**
  * Frees the memory taken up by the matrix. Use this function over regular
  * free() because this function also frees the internal elements of the matrix.
  *
@@ -109,7 +117,8 @@ Matrix *Matrix_add(Matrix *mat1, Matrix *mat2);
  */
 Matrix *Matrix_sub(Matrix *mat1, Matrix *mat2);
 
-/** Multiples a Matrix by a scalar value and creates a new Matrix with the
+/**
+ * Multiples a Matrix by a scalar value and creates a new Matrix with the
  * result.
  *
  * @param mat The Matrix
@@ -118,7 +127,8 @@ Matrix *Matrix_sub(Matrix *mat1, Matrix *mat2);
  */
 Matrix *Matrix_scalar_mul(Matrix *mat, double scalar);
 
-/** Multiplies two matrices together and creates a new Matrix with the result.
+/**
+ * Multiplies two matrices together and creates a new Matrix with the result.
  * Matrix 1's width must equal Matrix 2's height.
  *
  * @param mat1 Matrix 1
@@ -126,5 +136,30 @@ Matrix *Matrix_scalar_mul(Matrix *mat, double scalar);
  * @return Pointer to new allocated Matrix, or NULL if something went wrong.
  */
 Matrix *Matrix_mul(Matrix *mat1, Matrix *mat2);
+
+/**
+ * Rotates a Matrix 90 degrees to the right.
+ *
+ * @param mat The Matrix
+ * @return Pointer to new allocated Matrix, or NULL if something went wrong.
+ */
+Matrix *Matrix_rot_right(Matrix *mat);
+
+/**
+ * Rotates a Matrix 90 degrees to the left.
+ *
+ * @param mat The Matrix
+ * @return Pointer to new allocated Matrix, or NULL if something went wrong.
+ */
+Matrix *Matrix_rot_left(Matrix *mat);
+
+/**
+ * Rotates a Matrix by 180 degrees. This is equivalent to using
+ * Matrix_rot_left() or Matrix_rot_right() twice.
+ *
+ * @param mat The Matrix
+ * @return Pointer to new allocated Matrix, or NULL if something went wrong.
+ */
+Matrix *Matrix_rot_180(Matrix *mat);
 
 #endif

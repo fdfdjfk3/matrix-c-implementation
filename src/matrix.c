@@ -38,17 +38,29 @@ Matrix *Matrix_create_filled(size_t width, size_t height,
   return mat;
 }
 
+Matrix *Matrix_clone(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  Matrix *new = Matrix_create_empty(mat->width, mat->height);
+  memcpy(new->_elems, mat->_elems, new->width *new->height * sizeof(double));
+  return new;
+}
+
 void Matrix_free(Matrix *mat) {
   free(mat->_elems);
   free(mat);
 }
 
 double Matrix_get(Matrix *mat, size_t y, size_t x) {
-  return mat->_elems[y * mat->width + x];
+  if (y < mat->height && x < mat->width)
+    return mat->_elems[y * mat->width + x];
+  return 0.0;
 }
 
 void Matrix_set(Matrix *mat, size_t y, size_t x, double val) {
-  mat->_elems[y * mat->width + x] = val;
+  if (y < mat->height && x < mat->width)
+    mat->_elems[y * mat->width + x] = val;
 }
 
 void Matrix_print(Matrix *mat) {
@@ -155,13 +167,57 @@ Matrix *Matrix_mul(Matrix *mat1, Matrix *mat2) {
     for (size_t x = 0; x < result->width; x++) {
       double num = 0;
       for (size_t i = 0; i < mat1->width; i++) {
-        // debug lol printf("nums to be mult'd: %f * %f\n", Matrix_get(mat1, y,
-        // i), Matrix_get(mat2, i, x));
 
         // multiply the two numbers together
         num += Matrix_get(mat1, y, i) * Matrix_get(mat2, i, x);
       }
       Matrix_set(result, y, x, num);
+    }
+  }
+  return result;
+}
+
+Matrix *Matrix_rot_right(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  // create an empty matrix with the rotated dimensions
+  Matrix *result = Matrix_create_empty(mat->height, mat->width);
+
+  for (size_t y = 0; y < mat->height; y++) {
+    for (size_t x = 0; x < mat->width; x++) {
+      Matrix_set(result, x, (mat->height - 1) - y, Matrix_get(mat, y, x));
+    }
+  }
+  return result;
+}
+
+Matrix *Matrix_rot_left(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  // create an empty matrix with the rotated dimensions
+  Matrix *result = Matrix_create_empty(mat->height, mat->width);
+
+  for (size_t y = 0; y < mat->height; y++) {
+    for (size_t x = 0; x < mat->width; x++) {
+      Matrix_set(result, (mat->width - 1) - x, y, Matrix_get(mat, y, x));
+    }
+  }
+  return result;
+}
+
+Matrix *Matrix_rot_180(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  // create an empty matrix with the right dimensions
+  Matrix *result = Matrix_create_empty(mat->width, mat->height);
+
+  for (size_t y = 0; y < mat->height; y++) {
+    for (size_t x = 0; x < mat->width; x++) {
+      Matrix_set(result, (mat->width - 1) - y, (mat->height - 1) - x,
+                 Matrix_get(mat, y, x));
     }
   }
   return result;
