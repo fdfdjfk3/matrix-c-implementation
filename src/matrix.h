@@ -164,4 +164,12 @@ Matrix *Matrix_rot_left(Matrix *mat);
  */
 Matrix *Matrix_rot_180(Matrix *mat);
 
+/**
+ * Transposes a Matrix.
+ *
+ * @param mat The Matrix
+ * @return Pointer to new allocated Matrix, or NULL if something went wrong.
+ */
+Matrix *Matrix_transpose(Matrix *mat);
+
 #endif

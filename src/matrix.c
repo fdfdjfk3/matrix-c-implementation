@@ -230,3 +230,18 @@ Matrix *Matrix_rot_180(Matrix *mat) {
   }
   return result;
 }
+
+Matrix *Matrix_transpose(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  // create an empty matrix with the right dimensions
+  Matrix *result = Matrix_create_empty(mat->height, mat->width);
+
+  for (size_t y = 0; y < mat->height; y++) {
+    for (size_t x = 0; x < mat->width; x++) {
+      Matrix_set(result, x, y, Matrix_get(mat, y, x));
+    }
+  }
+  return result;
+}
