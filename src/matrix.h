@@ -165,6 +165,22 @@ Matrix *Matrix_rot_left(Matrix *mat);
 Matrix *Matrix_rot_180(Matrix *mat);
 
 /**
+ * Flips a matrix horizontally.
+ *
+ * @param mat The Matrix
+ * @return Pointer to new allocated Matrix, or NULL if something went wrong.
+ */
+Matrix *Matrix_flip_horiz(Matrix *mat);
+
+/**
+ * Flips a matrix vertically.
+ *
+ * @param mat The Matrix
+ * @return Pointer to new allocated Matrix, or NULL if something went wrong.
+ */
+Matrix *Matrix_flip_vert(Matrix *mat);
+
+/**
  * Transposes a Matrix.
  *
  * @param mat The Matrix

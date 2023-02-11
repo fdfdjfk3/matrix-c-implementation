@@ -43,6 +43,9 @@ Matrix *Matrix_clone(Matrix *mat) {
     return NULL;
 
   Matrix *new = Matrix_create_empty(mat->width, mat->height);
+  if (!new)
+    return NULL;
+
   memcpy(new->_elems, mat->_elems, new->width *new->height * sizeof(double));
   return new;
 }
@@ -59,7 +62,7 @@ double Matrix_get(Matrix *mat, size_t y, size_t x) {
 }
 
 int Matrix_set(Matrix *mat, size_t y, size_t x, double val) {
-  if (y >= mat->height && x >= mat->width) {
+  if (y >= mat->height || x >= mat->width) {
     return 1;
   }
   mat->_elems[y * mat->width + x] = val;
@@ -192,9 +195,13 @@ Matrix *Matrix_rot_right(Matrix *mat) {
   // create an empty matrix with the rotated dimensions
   Matrix *result = Matrix_create_empty(mat->height, mat->width);
 
+  // make sure that allocation was successful
+  if (!result)
+    return NULL;
+
   for (size_t y = 0; y < mat->height; y++) {
     for (size_t x = 0; x < mat->width; x++) {
-      Matrix_set(result, x, (mat->height - 1) - y, Matrix_get(mat, y, x));
+      Matrix_set(result, x, (result->width - 1) - y, Matrix_get(mat, y, x));
     }
   }
   return result;
@@ -207,9 +214,13 @@ Matrix *Matrix_rot_left(Matrix *mat) {
   // create an empty matrix with the rotated dimensions
   Matrix *result = Matrix_create_empty(mat->height, mat->width);
 
+  // make sure that allocation was successful
+  if (!result)
+    return NULL;
+
   for (size_t y = 0; y < mat->height; y++) {
     for (size_t x = 0; x < mat->width; x++) {
-      Matrix_set(result, (mat->width - 1) - x, y, Matrix_get(mat, y, x));
+      Matrix_set(result, (result->height - 1) - x, y, Matrix_get(mat, y, x));
     }
   }
   return result;
@@ -222,10 +233,52 @@ Matrix *Matrix_rot_180(Matrix *mat) {
   // create an empty matrix with the right dimensions
   Matrix *result = Matrix_create_empty(mat->width, mat->height);
 
+  // make sure that allocation was successful
+  if (!result)
+    return NULL;
+
   for (size_t y = 0; y < mat->height; y++) {
     for (size_t x = 0; x < mat->width; x++) {
-      Matrix_set(result, (mat->width - 1) - y, (mat->height - 1) - x,
+      Matrix_set(result, (result->width - 1) - y, (result->height - 1) - x,
                  Matrix_get(mat, y, x));
+    }
+  }
+  return result;
+}
+
+Matrix *Matrix_flip_horiz(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  // create an empty matrix with the right dimensions
+  Matrix *result = Matrix_create_empty(mat->width, mat->height);
+
+  // make sure that allocation was successful
+  if (!result)
+    return NULL;
+
+  for (size_t y = 0; y < mat->height; y++) {
+    for (size_t x = 0; x < mat->width; x++) {
+      Matrix_set(result, y, (result->width - 1) - x, Matrix_get(mat, y, x));
+    }
+  }
+  return result;
+}
+
+Matrix *Matrix_flip_vert(Matrix *mat) {
+  if (!mat)
+    return NULL;
+
+  // create an empty matrix with the right dimensions
+  Matrix *result = Matrix_create_empty(mat->width, mat->height);
+
+  // make sure that allocation was successful
+  if (!result)
+    return NULL;
+
+  for (size_t y = 0; y < mat->height; y++) {
+    for (size_t x = 0; x < mat->width; x++) {
+      Matrix_set(result, (result->height - 1) - y, x, Matrix_get(mat, y, x));
     }
   }
   return result;
@@ -237,6 +290,10 @@ Matrix *Matrix_transpose(Matrix *mat) {
 
   // create an empty matrix with the right dimensions
   Matrix *result = Matrix_create_empty(mat->height, mat->width);
+
+  // make sure that allocation was successful
+  if (!result)
+    return NULL;
 
   for (size_t y = 0; y < mat->height; y++) {
     for (size_t x = 0; x < mat->width; x++) {
