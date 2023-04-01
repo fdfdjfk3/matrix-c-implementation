@@ -316,6 +316,7 @@ static int _Matrix_det_recursive(double mul, Matrix *mat) {
   }
 
   bool add = false;
+  bool first_time = true;
   int determinant = 0;
 
   for (size_t xout = 0; xout < mat->width; xout++) {
@@ -330,8 +331,11 @@ static int _Matrix_det_recursive(double mul, Matrix *mat) {
         xidx++;
       }
     }
-
-    if (add) {
+    if (first_time) {
+      determinant = _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
+      first_time = false;
+      add = true;
+    } else if (add) {
       determinant += _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
     } else {
       determinant -= _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
