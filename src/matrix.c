@@ -302,3 +302,52 @@ Matrix *Matrix_transpose(Matrix *mat) {
   }
   return result;
 }
+
+static int _Matrix_det_recursive(double mul, Matrix *mat) {
+  if (mat->width == 0) {
+    return 0;
+  } else if (mat->width == 1) {
+    // get the only element
+    return Matrix_get(mat, 0, 0);
+  } else if (mat->width == 2) {
+    return (Matrix_get(mat, 0, 0) * Matrix_get(mat, 1, 1) -
+            Matrix_get(mat, 0, 1) * Matrix_get(mat, 1, 0)) *
+           mul;
+  }
+
+  bool add = false;
+  int determinant = 0;
+
+  for (size_t xout = 0; xout < mat->width; xout++) {
+    Matrix *slice = Matrix_create_empty(mat->width - 1, mat->height - 1);
+    for (size_t submat_y = 1; submat_y < mat->height; submat_y++) {
+      int xidx = 0;
+      for (size_t submat_x = 0; submat_x < mat->width; submat_x++) {
+        if (submat_x == xout)
+          continue;
+        Matrix_set(slice, submat_y - 1, xidx,
+                   Matrix_get(mat, submat_y, submat_x));
+        xidx++;
+      }
+    }
+
+    if (add) {
+      determinant += _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
+    } else {
+      determinant -= _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
+    }
+    add = !add;
+    Matrix_free(slice);
+  }
+  return mul * determinant;
+}
+
+int Matrix_determinant(Matrix *mat, int *result) {
+  if (!mat)
+    return 1;
+  if (mat->width != mat->height)
+    return 1;
+
+  *result = _Matrix_det_recursive(1, mat);
+  return 0;
+}
