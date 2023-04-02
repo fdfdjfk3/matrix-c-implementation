@@ -305,44 +305,53 @@ Matrix *Matrix_transpose(Matrix *mat) {
 
 static int _Matrix_det_recursive(double mul, Matrix *mat) {
   if (mat->width == 0) {
+    // what lol
     return 0;
   } else if (mat->width == 1) {
     // get the only element
     return Matrix_get(mat, 0, 0);
   } else if (mat->width == 2) {
+    // determinant = a * d - b * c
     return (Matrix_get(mat, 0, 0) * Matrix_get(mat, 1, 1) -
             Matrix_get(mat, 0, 1) * Matrix_get(mat, 1, 0)) *
            mul;
   }
 
-  bool add = false;
-  bool first_time = true;
+  bool add = true;
   int determinant = 0;
 
+  // loop through all sub-matrices that we need to find determinants of
   for (size_t xout = 0; xout < mat->width; xout++) {
-    Matrix *slice = Matrix_create_empty(mat->width - 1, mat->height - 1);
+    // this sub matrix will store all the relevant values
+    Matrix *sub_matrix = Matrix_create_empty(mat->width - 1, mat->height - 1);
     for (size_t submat_y = 1; submat_y < mat->height; submat_y++) {
+
+      // this is the index in the slice matrix
       int xidx = 0;
       for (size_t submat_x = 0; submat_x < mat->width; submat_x++) {
+        // if the index is one that is crossed out for this matrix
         if (submat_x == xout)
           continue;
-        Matrix_set(slice, submat_y - 1, xidx,
+        Matrix_set(sub_matrix, submat_y - 1, xidx,
                    Matrix_get(mat, submat_y, submat_x));
         xidx++;
       }
     }
-    if (first_time) {
-      determinant = _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
-      first_time = false;
-      add = true;
-    } else if (add) {
-      determinant += _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
+    // add determinant of sub-matrix to total determinant of matrix
+    if (add) {
+      determinant +=
+          _Matrix_det_recursive(Matrix_get(mat, 0, xout), sub_matrix);
     } else {
-      determinant -= _Matrix_det_recursive(Matrix_get(mat, 0, xout), slice);
+      determinant -=
+          _Matrix_det_recursive(Matrix_get(mat, 0, xout), sub_matrix);
     }
+    // next operation is opposite
     add = !add;
-    Matrix_free(slice);
+
+    // free the sub matrix for no nasty memory leaks
+    Matrix_free(sub_matrix);
   }
+
   return mul * determinant;
 }
 
