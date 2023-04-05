@@ -192,9 +192,9 @@ Matrix *Matrix_transpose(Matrix *mat);
  * Calculates the determinant of a matrix of size n*n.
  *
  * @param mat The Matrix
- * @param result Pointer to result int var
+ * @param result Pointer to result double var
  * @return Status (0 = success, 1 = error)
  */
-int Matrix_determinant(Matrix *mat, int *result);
+int Matrix_determinant(Matrix *mat, double *result);
 
 #endif

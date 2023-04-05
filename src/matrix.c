@@ -303,64 +303,118 @@ Matrix *Matrix_transpose(Matrix *mat) {
   return result;
 }
 
-static int _Matrix_det_recursive(double mul, Matrix *mat) {
-  if (mat->width == 0) {
+static double _Matrix_det_recursive(double mul, Matrix *mat, size_t size,
+                                    size_t y_start, size_t x_start,
+                                    bool original) {
+
+  static size_t original_size;
+  static bool *x_skip = NULL;
+  if (original) {
+    original_size = size;
+  }
+  if (!x_skip && original && size >= 4) {
+    x_skip = calloc(size, sizeof(bool));
+  }
+
+  // These are some hard-coded cases that dramatically speed up performance of
+  // this inefficient asf algorithm
+  if (size == 0) {
     // what lol
     return 0;
-  } else if (mat->width == 1) {
+  } else if (size == 1) {
     // get the only element
-    return Matrix_get(mat, 0, 0);
-  } else if (mat->width == 2) {
+    return Matrix_get(mat, y_start, x_start);
+  } else if (size == 2) {
+    size_t second;
+    for (size_t x = x_start + 1; x < original_size; x++) {
+      if (!x_skip || x_skip[x] == false) {
+        second = x;
+        break;
+      }
+    }
     // determinant = a * d - b * c
-    return (Matrix_get(mat, 0, 0) * Matrix_get(mat, 1, 1) -
-            Matrix_get(mat, 0, 1) * Matrix_get(mat, 1, 0)) *
+    return (Matrix_get(mat, y_start, x_start) *
+                Matrix_get(mat, y_start + 1, second) -
+            Matrix_get(mat, y_start, second) *
+                Matrix_get(mat, y_start + 1, x_start)) *
            mul;
+  } else if (size == 3) {
+    size_t second = x_start + 1;
+    bool second_is_good = false;
+    size_t third = x_start + 2;
+    while (x_skip && x_skip[second] == true) {
+      second++;
+    }
+    while (x_skip && (x_skip[third] == true || third == second)) {
+      third++;
+    }
+    double num1 = Matrix_get(mat, y_start, x_start) *
+                  (Matrix_get(mat, y_start + 1, second) *
+                       Matrix_get(mat, y_start + 2, third) -
+                   Matrix_get(mat, y_start + 1, third) *
+                       Matrix_get(mat, y_start + 2, second));
+    double num2 = Matrix_get(mat, y_start, second) *
+                  (Matrix_get(mat, y_start + 1, x_start) *
+                       Matrix_get(mat, y_start + 2, third) -
+                   Matrix_get(mat, y_start + 1, third) *
+                       Matrix_get(mat, y_start + 2, x_start));
+    double num3 = Matrix_get(mat, y_start, third) *
+                  (Matrix_get(mat, y_start + 1, x_start) *
+                       Matrix_get(mat, y_start + 2, second) -
+                   Matrix_get(mat, y_start + 1, second) *
+                       Matrix_get(mat, y_start + 2, x_start));
+    return mul * (num1 - num2 + num3);
   }
 
   bool add = true;
-  int determinant = 0;
+  double determinant = 0;
+  size_t left = x_start + 1;
 
   // loop through all sub-matrices that we need to find determinants of
-  for (size_t xout = 0; xout < mat->width; xout++) {
-    // this sub matrix will store all the relevant values
-    Matrix *sub_matrix = Matrix_create_empty(mat->width - 1, mat->height - 1);
-    for (size_t submat_y = 1; submat_y < mat->height; submat_y++) {
-
-      // this is the index in the slice matrix
-      int xidx = 0;
-      for (size_t submat_x = 0; submat_x < mat->width; submat_x++) {
-        // if the index is one that is crossed out for this matrix
-        if (submat_x == xout)
-          continue;
-        Matrix_set(sub_matrix, submat_y - 1, xidx,
-                   Matrix_get(mat, submat_y, submat_x));
-        xidx++;
+  size_t x_idx = x_start;
+  for (size_t xout = 0; xout < size; x_idx++) {
+    if (x_skip[x_idx] == true) {
+      continue;
+    }
+    if (x_idx == original_size) {
+      break;
+    }
+    x_skip[x_idx] = true;
+    for (size_t st = x_start; st < original_size; st++) {
+      if (x_skip[st] == false) {
+        left = st;
+        break;
       }
     }
+
     // add determinant of sub-matrix to total determinant of matrix
     if (add) {
-      determinant +=
-          _Matrix_det_recursive(Matrix_get(mat, 0, xout), sub_matrix);
+      determinant += _Matrix_det_recursive(Matrix_get(mat, y_start, x_idx), mat,
+                                           size - 1, y_start + 1, left, false);
     } else {
-      determinant -=
-          _Matrix_det_recursive(Matrix_get(mat, 0, xout), sub_matrix);
+      determinant -= _Matrix_det_recursive(Matrix_get(mat, y_start, x_idx), mat,
+                                           size - 1, y_start + 1, left, false);
     }
     // next operation is opposite
     add = !add;
 
-    // free the sub matrix for no nasty memory leaks
-    Matrix_free(sub_matrix);
+    x_skip[x_idx] = false;
+    xout++;
   }
 
+  if (original) {
+    free(x_skip);
+    x_skip = NULL;
+  }
   return mul * determinant;
 }
 
-int Matrix_determinant(Matrix *mat, int *result) {
+int Matrix_determinant(Matrix *mat, double *result) {
   if (!mat)
     return 1;
   if (mat->width != mat->height)
     return 1;
 
-  *result = _Matrix_det_recursive(1, mat);
+  *result = _Matrix_det_recursive(1, mat, mat->width, 0, 0, true);
   return 0;
 }
